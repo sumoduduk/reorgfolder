@@ -9,10 +9,10 @@ use std::io::{self, Read, Write};
 use std::path::Path;
 
 fn main() -> eyre::Result<()> {
-    // let mut args = env::args();
-    // let arg = args.nth(0).expect("add folder name");
+    let mut args = env::args();
+    let arg = args.nth(0).expect("add folder name");
 
-    let parent_path = Path::new(".");
+    let parent_path = Path::new(&arg);
 
     let file_names = fs::read_dir(parent_path).map_err(|e| eyre!("can't read folder : {}", e))?;
 
