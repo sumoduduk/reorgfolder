@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 mod move_file;
 
+use clap::Parser;
 use eyre::eyre;
 use move_file::move_file;
 use std::env;
@@ -8,31 +9,60 @@ use std::fs::{self, create_dir_all, DirEntry, File};
 use std::io::{self, Read, Write};
 use std::path::Path;
 
+#[derive(Parser, Debug)]
+#[command(
+    name = "reorgfolder",
+    about = "utility tool for reorganizing folders",
+    author,
+    version = "0.1.0"
+)]
+struct Command {
+    #[arg(short = 'p', help = "path directory of target folder")]
+    path: String,
+
+    #[arg(
+        short = 'o',
+        long = "optional-folder",
+        help = "(optional) optional folder will be created if not exist in the target folder as parent"
+    )]
+    optional_folder: Option<String>,
+}
+
 fn main() -> eyre::Result<()> {
-    let mut args = env::args();
-    let arg = args.nth(0).expect("add folder name");
+    let args = Command::parse();
 
-    let parent_path = Path::new(&arg);
+    let mut target_path = Path::new(&args.path).to_path_buf();
+    let origin_path = target_path.clone();
 
-    let file_names = fs::read_dir(parent_path).map_err(|e| eyre!("can't read folder : {}", e))?;
+    let file_names = fs::read_dir(&target_path).map_err(|e| eyre!("can't read folder : {}", e))?;
+
+    if let Some(parent_folder) = args.optional_folder {
+        let parent_path = target_path.join(&parent_folder).to_path_buf();
+        target_path = parent_path;
+    }
+
+    println!("path : {:#?}", &target_path);
 
     for entry in file_names {
         let path = entry?.path();
+        println!("filename {:#?}", &path);
+
+        if path.is_dir() {
+            continue;
+        }
 
         let extension = path.extension();
 
-        match extension {
-            Some(exten) => {
-                let extn_name = exten
-                    .to_str()
-                    .ok_or_else(|| eyre!("failed to parse extension to string"))?;
+        let extn_name = extension.and_then(|extn| extn.to_str());
 
-                let out_folder = parent_path.join(extn_name);
-                create_folder(&out_folder)?;
-                move_file(&parent_path, &out_folder, get_filename(&path)?)?
-            }
-            None => println!("{} is a folder", get_filename(&path)?),
+        let Some(is_file) = extn_name else {
+            continue;
         };
+
+        let out_folder = target_path.join(is_file);
+
+        create_folder(&out_folder)?;
+        move_file(&origin_path, &out_folder, get_filename(&path)?)?
     }
     println!("finish");
     Ok(())
@@ -54,3 +84,4 @@ fn create_folder(path: &Path) -> eyre::Result<()> {
     }
     Ok(())
 }
+
