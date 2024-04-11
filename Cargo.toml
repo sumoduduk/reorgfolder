@@ -19,4 +19,4 @@ codegen-units = 1
 
 [package.metadata.packager]
 before-packaging-command = "cargo build --release"
-formats = ["deb", "pacman"]
+formats = ["deb", "pacman", ""]

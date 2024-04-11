@@ -1,0 +1,43 @@
+---
+name: Build Release
+on:
+  push:
+    branch: release
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build
+        run: cargo build -F ${{ vars.CARGO_FEATURES }} --release
+      - name: Package
+        run: cargo packager --release
+      - name: Calculate Checksum
+        run: |
+          echo "deb_sha256=$(sha256sum target/release/*.deb | awk '{print $1}')" >> $GITHUB_ENV
+          echo "tar_sha256=$(sha256sum target/release/*.tar.gz | awk '{print $1}')" >> $GITHUB_ENV
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-release
+          path: |
+            target/release/*.deb
+            target/release/*.tar.gz
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+      - name: Generate Release Notes
+        run: |
+          echo "## Checksums" > release_notes.md
+          echo "- deb : \`${{ env.deb_sha256 }}\`" >> release_notes.md
+          echo "- tar : \`${{ env.tar_sha256 }}\`" >> release_notes.md
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release_notes.md
+          files: |-
+            linux-release/*.deb 
+            linux-release/*.tar.gz
