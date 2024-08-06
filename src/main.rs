@@ -4,10 +4,11 @@ mod move_file;
 use clap::Parser;
 use eyre::eyre;
 use move_file::move_file;
-use std::env;
 use std::fs::{self, create_dir_all, DirEntry, File};
 use std::io::{self, Read, Write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use std::sync::Arc;
+use std::{env, thread};
 
 #[derive(Parser, Debug)]
 #[command(
@@ -31,38 +32,68 @@ struct Command {
 fn main() -> eyre::Result<()> {
     let args = Command::parse();
 
-    let mut target_path = Path::new(&args.path).to_path_buf();
+    let mut target_path = PathBuf::from(&args.path);
     let origin_path = target_path.clone();
 
     let file_names = fs::read_dir(&target_path).map_err(|e| eyre!("can't read folder : {}", e))?;
 
     if let Some(parent_folder) = args.optional_folder {
-        let parent_path = target_path.join(&parent_folder).to_path_buf();
-        target_path = parent_path;
+        target_path.push(parent_folder);
     }
 
     println!("path : {:#?}", &target_path);
 
+    let mut handlers = Vec::new();
+
+    let arc_target_path = Arc::new(target_path);
+    let arc_origin = Arc::new(origin_path);
+
     for entry in file_names {
+        let target_clone = Arc::clone(&arc_target_path);
+
+        let target_origin = Arc::clone(&arc_origin);
+
         let path = entry?.path();
-        println!("filename {:#?}", &path);
+        let handler = thread::spawn(move || {
+            println!("filename {:#?}", &path);
 
-        if path.is_dir() {
-            continue;
+            if path.is_dir() {
+                return;
+            }
+
+            let extension = path.extension();
+
+            let extn_name = extension.and_then(|extn| extn.to_str());
+
+            let Some(is_file) = extn_name else {
+                return;
+            };
+
+            let out_folder = target_clone.join(is_file);
+
+            match create_folder(&out_folder) {
+                Ok(_) => {
+                    if let Ok(name_file) = get_filename(&path) {
+                        let _ = move_file(&target_origin, &out_folder, name_file);
+                    }
+                }
+
+                Err(err) => {
+                    println!("{err}")
+                }
+            }
+        });
+
+        handlers.push(handler);
+    }
+
+    for handler in handlers {
+        match handler.join() {
+            Ok(_) => {}
+            Err(err) => {
+                dbg!(err);
+            }
         }
-
-        let extension = path.extension();
-
-        let extn_name = extension.and_then(|extn| extn.to_str());
-
-        let Some(is_file) = extn_name else {
-            continue;
-        };
-
-        let out_folder = target_path.join(is_file);
-
-        create_folder(&out_folder)?;
-        move_file(&origin_path, &out_folder, get_filename(&path)?)?
     }
     println!("finish");
     Ok(())
@@ -84,4 +115,3 @@ fn create_folder(path: &Path) -> eyre::Result<()> {
     }
     Ok(())
 }
-
