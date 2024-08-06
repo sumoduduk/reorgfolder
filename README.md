@@ -49,7 +49,7 @@ Navigate to the destination folder where you want to reorganize files.
 Run the reorgfolder command:
 
 ```bash
-reorgfolder
+reorgfolder -p {your_folder_name} -o {parent_folder/OPTIONAL}
 ```
 
 The utility will then categorize the files in the folder based on their extensions, copy them to their respective subfolders, and move the original files to the trash (macOS) or recycle bin (Windows).
