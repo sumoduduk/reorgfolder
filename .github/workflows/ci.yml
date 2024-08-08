@@ -31,16 +31,19 @@ jobs:
           path: result/bin/reorgfolder
 
   test:
-      name: "Test Reorgfolder"
-      runs-on: ubuntu-latest
-      needs: build-x86_64-linux
-      steps:
-        - uses: actions/download-artifact@v4
-          with:
-            name: reorgfolder-binary
+    name: "Test Reorgfolder"
+    runs-on: ubuntu-latest
+    needs: build-x86_64-linux
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: reorgfolder-binary
 
-        - name: Make binary executable
-          run: chmod +x reorgfolder
+      - name: List files in the directory
+        run: ls -R
 
-        - name: Run Reorgfolder
-          run: ./reorgfolder --help
+      - name: Make binary executable
+        run: chmod +x ./result/bin/reorgfolder
+
+      - name: Run Reorgfolder
+        run: ./result/bin/reorgfolder --help
