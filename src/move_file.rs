@@ -54,38 +54,45 @@ fn get_available_filename(filename: &mut PathBuf) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::env;
 
     #[test]
     fn test_avail() {
-        let mut filename = PathBuf::from("assets/test.txt");
+        let filename = env::temp_dir().join("test.txt");
+        let mut filename_target = env::temp_dir().join("test.txt");
 
         File::create(&filename).unwrap();
 
-        get_available_filename(&mut filename);
-        let expect_name = PathBuf::from("assets/test(1).txt");
+        get_available_filename(&mut filename_target);
+        let expect_name = env::temp_dir().join("test(1).txt");
 
-        assert_eq!(expect_name, filename);
-        trash::delete("assets/test.txt").unwrap();
+        assert_eq!(expect_name, filename_target);
+        trash::delete(&filename).unwrap();
     }
 
     #[test]
     fn test_avail_2() {
-        let mut filename = PathBuf::from("assets/file.txt");
+        let filename = env::temp_dir().join("file.txt");
+        let filename_1 = env::temp_dir().join("file(1).txt");
+        let filename_2 = env::temp_dir().join("file(2).txt");
+        let filename_3 = env::temp_dir().join("file(3).txt");
 
-        File::create("assets/file.txt").unwrap();
-        File::create("assets/file(1).txt").unwrap();
-        File::create("assets/file(2).txt").unwrap();
-        File::create("assets/file(3).txt").unwrap();
+        let mut filename_target = env::temp_dir().join("file.txt");
 
-        get_available_filename(&mut filename);
-        let expect_name = PathBuf::from("assets/file(4).txt");
+        File::create(&filename).unwrap();
+        File::create(&filename_1).unwrap();
+        File::create(&filename_2).unwrap();
+        File::create(&filename_3).unwrap();
 
-        assert_eq!(expect_name, filename);
+        get_available_filename(&mut filename_target);
+        let expect_name = env::temp_dir().join("file(4).txt");
 
-        trash::delete("assets/file.txt").unwrap();
-        trash::delete("assets/file(1).txt").unwrap();
-        trash::delete("assets/file(2).txt").unwrap();
-        trash::delete("assets/file(3).txt").unwrap();
+        assert_eq!(expect_name, filename_target);
+
+        trash::delete(&filename).unwrap();
+        trash::delete(&filename_1).unwrap();
+        trash::delete(&filename_2).unwrap();
+        trash::delete(&filename_3).unwrap();
     }
 
     #[test]
