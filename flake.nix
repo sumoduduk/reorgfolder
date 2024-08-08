@@ -1,5 +1,5 @@
 {
-  description = "Flake file for Reorgfolder App";
+  description = "Flake file for Reorgfolder App Package";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
@@ -17,7 +17,7 @@
     crane,
     flake-utils,
     ...
-  }: 
+  }:
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = nixpkgs.legacyPackages.${system};
 
@@ -27,30 +27,32 @@
         src = craneLib.cleanCargoSource ./.;
         strictDeps = true;
 
-        buildInputs = [
-          #pkgs.openssl
-        ] ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
+        buildInputs =
+          [
+            #pkgs.openssl
+          ]
+          ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
             pkgs.libiconv
-        ];
+          ];
         nativeBuildInputs = [
           # pkgs.pkg-config
         ];
       };
 
-      reorgfolder = craneLib.buildPackage (commonArgs // {
-        cargoArtifacts = craneLib.buildDepsOnly commonArgs
+      reorgfolder = craneLib.buildPackage (commonArgs
+        // {
+          cargoArtifacts = craneLib.buildDepsOnly commonArgs;
           # Additional environment variables or build phases/hooks can be set
           # here *without* rebuilding all dependency crates
           # MY_CUSTOM_VAR = "some value";
-    });
-      in {
+        });
+    in {
       checks = {
-
         inherit reorgfolder;
       };
 
       packages.default = reorgfolder;
-      
+
       apps.default = flake-utils.lib.mkApp {
         drv = reorgfolder;
       };
@@ -65,14 +67,10 @@
 
         '';
 
-
         # Extra inputs can be added here; cargo and rustc are provided by default.
         packages = [
           # pkgs.ripgrep
         ];
       };
-
-    
-
     });
 }
