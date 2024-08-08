@@ -51,7 +51,19 @@
         inherit reorgfolder;
       };
 
-      packages.default = reorgfolder;
+      packages =
+        {
+          default = reorgfolder;
+        }
+        // (
+          if system == "x86_64-linux"
+          then {
+            reorgfolder-bin-aur = pkgs.callPackage ./nix/pkgbuild.nix {
+              reorgfolder = self.packages.x86_64-linux.reorgfolder;
+            };
+          }
+          else {}
+        );
 
       apps.default = flake-utils.lib.mkApp {
         drv = reorgfolder;
@@ -64,7 +76,6 @@
         # MY_CUSTOM_DEVELOPMENT_VAR = "something else";
         shellHook = ''
           alias cls="clear"
-
         '';
 
         # Extra inputs can be added here; cargo and rustc are provided by default.
