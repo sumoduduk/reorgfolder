@@ -2,6 +2,23 @@
 name = "reorgfolder"
 version = "0.1.0"
 edition = "2021"
+license = "GPL-3.0"
+include = [
+	"src/**/*",
+	"Cargo.toml",
+	"README.md",
+	"LICENSE"
+]
+homepage = "https://github.com/sumoduduk/reorgfolder"
+description = "Blazingly fast and safe utility written in Rust for reorganizing folders by grouping files based on their extensions."
+repository = "https://github.com/sumoduduk/reorgfolder"
+keywords = [
+	"cli",
+  "multi-threaded",
+  "filesystem"
+]
+categories = ["command-line-utilities" , "filesystem"]
+authors = ["Iqbal Abdurachman <email@abdurachmaniqbal.my.id>"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -19,4 +36,4 @@ codegen-units = 1
 
 [package.metadata.packager]
 before-packaging-command = "cargo build --release"
-formats = ["deb", "pacman", ""]
+formats = ["deb", "pacman" ]
