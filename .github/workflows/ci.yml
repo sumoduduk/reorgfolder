@@ -43,7 +43,7 @@ jobs:
         run: ls -R
 
       - name: Make binary executable
-        run: chmod +x ./reorgfolder
+        run: chmod +x reorgfolder
 
       - name: Run Reorgfolder
         run: ./reorgfolder --help
