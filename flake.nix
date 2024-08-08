@@ -59,7 +59,7 @@
           if system == "x86_64-linux"
           then {
             reorgfolder-bin-aur = pkgs.callPackage ./nix/pkgbuild.nix {
-              reorgfolder = self.packages.x86_64-linux.reorgfolder;
+              inherit reorgfolder;
             };
           }
           else {}
