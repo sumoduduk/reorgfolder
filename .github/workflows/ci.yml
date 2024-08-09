@@ -28,10 +28,10 @@ jobs:
         run : ./result/bin/reorgfolder --version
 
       - name : patch the elf bin
-        run : nix develop --command ./scripts/export-linux-bin.sh result/bin/reorgfolder
+        run : nix develop --command ./scripts/export-linux-bin.sh reorgfolder ./binary
 
       - name: 'Tar files'
-        run: tar -cvf reorgfolder.tar result/bin/reorgfolder
+        run: tar -cvf reorgfolder.tar binary/reorgfolder
 
       - uses: actions/upload-artifact@v4
         with:
@@ -57,5 +57,5 @@ jobs:
         run: ls -R
 
       - name: Run binary with --help
-        run : ./result/bin/reorgfolder --help
+        run : ./binary/reorgfolder --help
 
