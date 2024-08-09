@@ -28,7 +28,7 @@ jobs:
         run : ./result/bin/reorgfolder --version
 
       - name : patch the elf bin
-        run : nix develop --command ./scripts/export-linux-bin.sh result/bin/reorfolder
+        run : nix develop --command ./scripts/export-linux-bin.sh result/bin/reorgfolder
 
       - name: 'Tar files'
         run: tar -cvf reorgfolder.tar result/bin/reorgfolder
