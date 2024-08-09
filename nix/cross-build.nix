@@ -1,8 +1,9 @@
 {
   inputs,
-  hostSystem,
+  system,
   crossSystem,
   rustTargetTriple,
+  pathCwd,
   ...
 }: let
   inherit (inputs) nixpkgs crane rust-overlay;
@@ -10,7 +11,7 @@
   common = import ./common.nix {};
 
   pkgs = import nixpkgs {
-    inherit crossSystem hostSystem;
+    inherit crossSystem system;
     overlays = [(import rust-overlay)];
   };
 
@@ -24,8 +25,7 @@
     stdenv,
   }: let
     reorgfolderCommon = common.reorgfolder {
-      inherit lib craneLib;
-      reorgfolder = inputs.reorgfolder;
+      inherit lib craneLib pathCwd;
     };
 
     commonArgs = {
@@ -63,7 +63,7 @@
     craneLib.buildPackage (commonArgs
       // {
         pname = "reorgfolder";
-        version = reorgfolderCommon.version;
+        version = reorgfolderCommon.crateInfo.version;
 
         inherit cargoArtifacts;
 
