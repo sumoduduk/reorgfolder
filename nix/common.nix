@@ -4,16 +4,16 @@
   reorgfolder = {
     lib,
     craneLib,
-    reorgfolder,
+    pathCwd,
   }: let
     nonCargoBuildFiles = path: _type: builtins.match ".*(sql|md)$" path != null;
     includeFilesFilter = path: type:
       (craneLib.filterCargoSources path type) || (nonCargoBuildFiles path type);
   in {
-    crateInfo = craneLib.crateNameFromCargoToml {cargoToml = reorgfolder + "/Cargo.toml";};
+    crateInfo = craneLib.crateNameFromCargoToml {cargoToml = pathCwd + "/Cargo.toml";};
 
     src = lib.cleanSourceWith {
-      src = reorgfolder;
+      src = pathCwd;
       filter = includeFilesFilter;
     };
   };
