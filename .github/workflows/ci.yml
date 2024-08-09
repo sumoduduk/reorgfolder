@@ -24,10 +24,17 @@ jobs:
       - name: Build package
         run: nix build --show-trace --log-lines 10000 --fallback
 
+      - name : get version of app
+        run : ./result/bin/reorgfolder --version
+
+      - name: 'Tar files'
+        run: tar -cvf reorgfolder.tar result/bin/reorgfolder
+
+
       - uses: actions/upload-artifact@v4
         with:
           name: reorgfolder-binary
-          path: result/bin/reorgfolder
+          path: reorgfolder.tar
 
       - name: Run checks
         run: nix flake check --keep-going --all-systems
@@ -37,15 +44,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-x86_64-linux
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Download artifact
+        uses: actions/download-artifact@v4
         with:
           name: reorgfolder-binary
+          path: ./
 
-      - name: List files in the directory
+      - name: Extract tar file
+        run: tar -xvf reorgfolder.tar
+
+      - name: List directory structure
         run: ls -R
 
-      - name: Make binary executable
-        run: chmod +x reorgfolder
-
-      - name: Run Reorgfolder
+      - name: Run binary with --help
         run: ./reorgfolder --help
+
