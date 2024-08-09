@@ -27,11 +27,8 @@ jobs:
       - name : get version of app
         run : ./result/bin/reorgfolder --version
 
-      - name : chmod the file
-        run : chmod 777 result/bin/reorgfolder
-
-      - name : patch the elf
-        run : patchelf --set-interpreter /lib64/ld-linux-x86-64.so.2 --set-rpath /lib/x86_64-linux-gnu result/bin/reorgfolder
+      - name : patch the elf bin
+        run : nix develop --command ./scripts/export-linux-bin.sh result/bin/reorfolder
 
       - name: 'Tar files'
         run: tar -cvf reorgfolder.tar result/bin/reorgfolder
