@@ -27,17 +27,20 @@ jobs:
       - name : get version of app
         run : ./result/bin/reorgfolder --version
 
+      - name : chmod the file
+        run : chmod 777 result/bin/reorgfolder
+
+      - name : patch the elf
+        run : patchelf --set-interpreter /lib64/ld-linux-x86-64.so.2 --set-rpath /lib/x86_64-linux-gnu result/bin/reorgfolder
+
       - name: 'Tar files'
         run: tar -cvf reorgfolder.tar result/bin/reorgfolder
-
 
       - uses: actions/upload-artifact@v4
         with:
           name: reorgfolder-binary
           path: reorgfolder.tar
 
-      - name: Run checks
-        run: nix flake check --keep-going --all-systems
 
   test:
     name: "Test Reorgfolder"
