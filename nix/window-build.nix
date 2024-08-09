@@ -1,13 +1,14 @@
 {
   inputs,
-  hostSystem,
+  system,
+  pathCwd,
 }: let
   inherit (inputs) nixpkgs crane fenix;
   common = import ./common.nix {};
 
-  pkgs = nixpkgs.legacyPackages.${hostSystem};
+  pkgs = nixpkgs.legacyPackages.${system};
 
-  toolchain = with fenix.packages.${hostSystem};
+  toolchain = with fenix.packages.${system};
     combine [
       minimal.rustc
       minimal.cargo
@@ -17,9 +18,8 @@
   craneLib = (crane.mkLib pkgs).overrideToolchain toolchain;
 
   reorgfolderCommon = common.reorgfolder {
-    inherit craneLib;
+    inherit craneLib pathCwd;
     lib = pkgs.lib;
-    reorgfolder = inputs.reorgfolder;
   };
 
   commonArgs = {
