@@ -131,7 +131,8 @@ jobs:
     steps: 
 
     - uses: actions/download-artifact@v4
-      with: reorgfolder-x86_64-linux
+      with:
+        name: reorgfolder-x86_64-linux
 
     - name: set permissions on package
       run: chmod +x binaries/reorgfolder-x86_64-linux
@@ -170,17 +171,17 @@ jobs:
       run: ./binaries/reorgfolder-x86_64-apple --help
 
 
-    test-from-windows:
-      name : test for windows
-      runs-on: windows-latest
-      needs: build-for-apple-intel
-      steps: 
-      - uses: actions/download-artifact@v4
-        with: 
-          name: reorgfolder-x86_64-windows
+  test-from-windows:
+    name : test for windows
+    runs-on: windows-latest
+    needs: build-for-apple-intel
+    steps: 
+    - uses: actions/download-artifact@v4
+      with: 
+        name: reorgfolder-x86_64-windows
 
-      - name: Ensure the command runs
-        run: ./binaries/reorgfolder-x86_64-windows.exe --help
+    - name: Ensure the command runs
+      run: ./binaries/reorgfolder-x86_64-windows.exe --help
 
   make-release-group:
     runs-on: ubuntu-latest
