@@ -1,14 +1,14 @@
 {
   inputs,
-  system,
+  localSystem,
   pathCwd,
 }: let
   inherit (inputs) nixpkgs crane fenix;
   common = import ./common.nix {};
 
-  pkgs = nixpkgs.legacyPackages.${system};
+  pkgs = nixpkgs.legacyPackages.${localSystem};
 
-  toolchain = with fenix.packages.${system};
+  toolchain = with fenix.packages.${localSystem};
     combine [
       minimal.rustc
       minimal.cargo
