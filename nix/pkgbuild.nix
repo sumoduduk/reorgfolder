@@ -23,7 +23,8 @@
      sha256sums=("%%SHA256SUM%%")
 
      package() {
-         install -Dm755 reorgfolder -t "$pkgdir/usr/bin"
+        mv reorgfolder-x86_64-linux reorgfolder
+        install -Dm755 reorgfolder -t "$pkgdir/usr/bin"
      }
   '';
 
