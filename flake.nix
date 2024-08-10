@@ -31,43 +31,43 @@
     rust-overlay,
     ...
   }:
-    flake-utils.lib.eachDefaultSystem (system: {
+    flake-utils.lib.eachDefaultSystem (localSystem: {
       packages = let
         defineReorgfolderPkgs = {}:
           {
             reorgfolder_aarch64-linux = import ./nix/cross-build.nix {
-              inherit system inputs;
+              inherit localSystem inputs;
               pathCwd = ./.;
               crossSystem = "aarch64-linux";
               rustTargetTriple = "aarch64-unknown-linux-gnu";
             };
 
             reorgfolder_x86_64-linux = import ./nix/cross-build.nix {
-              inherit system inputs;
+              inherit localSystem inputs;
               pathCwd = ./.;
               crossSystem = "x86_64-linux";
               rustTargetTriple = "x86_64-unknown-linux-gnu";
             };
 
             reorgfolder_x86_64-windows = import ./nix/window-build.nix {
-              inherit system inputs;
+              inherit localSystem inputs;
               pathCwd = ./.;
             };
           }
           // (
-            if system == "aarch64-darwin"
+            if localSystem == "aarch64-darwin"
             then {
               reorgfolder_aarch64-apple = import ./nix/cross-build.nix {
-                inherit system inputs;
+                inherit localSystem inputs;
                 pathCwd = ./.;
                 crossSystem = "aarch64-darwin";
                 rustTargetTriple = "aarch64-apple-darwin";
               };
             }
-            else if system == "x86_64-darwin"
+            else if localSystem == "x86_64-darwin"
             then {
               reorgfolder_x86_64-apple = import ./nix/cross-build.nix {
-                inherit system inputs;
+                inherit localSystem inputs;
                 pathCwd = ./.;
                 crossSystem = "x86_64-darwin";
                 rustTargetTriple = "x86_64-apple-darwin";
@@ -79,11 +79,11 @@
         defineReorgfolderPkgs {};
 
       apps.default = flake-utils.lib.mkApp {
-        drv = nixpkgs.lib.getAttr "reorgfolder_${system}" self.packages.${system};
+        drv = nixpkgs.lib.getAttr "reorgfolder_${localSystem}" self.packages.${localSystem};
       };
 
       devShells.default = let
-        pkgs = nixpkgs.legacyPackages.${system};
+        pkgs = nixpkgs.legacyPackages.${localSystem};
       in
         pkgs.mkShell {
           packages = with pkgs; [
