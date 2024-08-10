@@ -22,6 +22,7 @@
 
   createExpression = {
     lib,
+    pkg-config,
     stdenv,
   }: let
     reorgfolderCommon = common.reorgfolder {
@@ -39,6 +40,7 @@
 
       nativeBuildInputs = [
         stdenv.cc
+        pkg-config
       ];
 
       buildInputs =
@@ -47,6 +49,7 @@
         ]
         ++ pkgs.lib.optionals pkgs.stdenv.isDarwin [
           pkgs.libiconv
+          pkgs.darwin.apple_sdk.frameworks.Security
         ];
 
       CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER = "${stdenv.cc.targetPrefix}cc";
