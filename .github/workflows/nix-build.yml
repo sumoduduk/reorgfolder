@@ -1,0 +1,209 @@
+name : Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.ref_name }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  verify-flake:
+    runs-on: ubuntu-20.4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/common-setup
+        with:
+          cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Check Nix flake
+        run: nix flake check --all-systems
+
+  build-for-linux_x86_64:
+    name: build for linux_x86_64
+    runs-on: ubuntu-20.4
+    needs: [verify-flake]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/common-setup
+        with:
+          cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Build Reorgfolder for x86_64-unknown-linux-gnu
+        run: |
+          nix build .#reorgfolder_x86_64-linux --show-trace --log-lines 10000 
+          ./result/bin/reorgfolder --version
+          nix develop --command ./scripts/export-linux-bin.sh reorgfolder ./binaries
+
+      - name : upload packages reorgfolder-x86_64-linux
+        uses : actions/upload-artifact@v4
+        with : 
+          name : reorgfolder-x86_64-linux
+          path : binaries/reorgfolder-x86_64-linux
+
+
+  build-for-arm-linux-and-windows:
+    name: build for linux arm and windows
+    runs-on: ubuntu-20.4
+    needs: [verify-flake]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/common-setup
+        with:
+          cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Build Reorgfolder for aarch64-unknown-linux-gnu
+        run: |
+          nix build .#reorgfolder_aarch64-linux --show-trace --log-lines 10000
+          cp ./result/bin/reorgfolder binaries/reorgfolder-aarch64-linux
+
+      - name : upload packages reorgfolder-aarch64-linux
+        uses : actions/upload-artifact@v4
+        with : 
+          name : reorgfolder-aarch64-linux
+          path : binaries/reorgfolder-aarch64-linux
+
+      - name: Build Reorgfolder for x86_64-pc-windows-gnu
+        run: |
+          nix build .#reorgfolder_x86_64-windows --show-trace --log-lines 10000
+          cp ./result/bin/reorgfolder.exe binaries/reorgfolder-x86_64-windows.exe
+
+      - name : upload packages reorgfolder-x86_64-windows
+        uses : actions/upload-artifact@v4
+        with : 
+          name : reorgfolder-x86_64-windows
+          path : binaries/reorgfolder-x86_64-windows.exe
+
+
+  build-for-apple-arm:
+    name: build for apple M chip
+    runs-on: macos-latest
+    needs: [verify-flake]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/common-setup
+        with:
+          cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Build Reorgfolder for aarch64-apple-darwin
+        run: |
+          nix build .#reorgfolder_aarch64-apple --show-trace --log-lines 10000
+          ./result/bin/reorgfolder --version
+          cp ./result/bin/reorgfolder binaries/reorgfolder-aarch64-apple
+
+      - name : upload packages reorgfolder-aarch64-apple
+        uses : actions/upload-artifact@v4
+        with : 
+          name : reorgfolder-aarch64-apple
+          path : binaries/reorgfolder-aarch64-apple
+
+  build-for-apple-intel:
+    name: build for x86_64-apple-darwin
+    runs-on: macos-13
+    needs: [verify-flake]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/common-setup
+        with:
+          cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Build reorgfolder for x86_64-apple-darwin
+        run: |
+          nix build .#reorgfolder_x86_64-apple --show-trace --log-lines 10000
+          ./result/bin/reorgfolder --version
+          cp ./result/bin/reorgfolder binaries/reorgfolder-x86_64-apple
+
+      - name : upload packages reorgfolder-x86_64-apple
+        uses : actions/upload-artifact@v4
+        with : 
+          name : reorgfolder-x86_64-apple
+          path : binaries/reorgfolder-x86_64-apple
+
+  test-from-latest-ubuntu:
+    name : test for linux_x86_64
+    runs-on: ubuntu-latest
+    needs: build-for-linux_x86_64
+    steps: 
+
+    - uses: actions/download-artifact@v4
+      with: reorgfolder-x86_64-linux
+
+    - name: set permissions on package
+      run: chmod +x binaries/reorgfolder-x86_64-linux
+
+    - name: Ensure the command runs
+      run: ./binaries/reorgfolder-x86_64-linux --help
+
+  test-from-apple-arm:
+    name : test for apple ARM
+    runs-on: macos-latest
+    needs: build-for-apple-arm
+    steps: 
+    - uses: actions/download-artifact@v4
+      with: reorgfolder-aarch64-apple
+
+    - name: set permissions on package
+      run: chmod +x binaries/reorgfolder-aarch64-apple
+
+    - name: Ensure the command runs
+      run: ./binaries/reorgfolder-aarch64-apple --help
+
+  test-from-apple-x86_64:
+    name : test for  x86_64-apple-darwin
+    runs-on: macos-13
+    needs: build-for-apple-intel
+    steps: 
+    - uses: actions/download-artifact@v4
+      with: reorgfolder-x86_64-apple
+
+    - name: set permissions on package
+      run: chmod +x binaries/reorgfolder-x86_64-apple
+
+    - name: Ensure the command runs
+      run: ./binaries/reorgfolder-x86_64-apple --help
+
+
+    test-from-windows:
+      name : test for windows
+      runs-on: windows-latest
+      needs: build-for-apple-intel
+      steps: 
+      - uses: actions/download-artifact@v4
+        with: reorgfolder-x86_64-windows
+
+      - name: Ensure the command runs
+        run: ./binaries/reorgfolder-x86_64-windows.exe --help
+
+  make-release-group:
+    runs-on: ubuntu-latest
+    needs:
+      - test-from-latest-ubuntu
+      - test-from-apple-arm 
+      - test-from-apple-x86_64
+      - test-from-windows
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name : List all packages
+        run : ls -R
+
+      # - name: Assemble release directory
+      #   run: |
+      #     mkdir release
+      #     for i in reorgfolder-*; do
+      #       cp "$i/*" "release/"
+      #     done
+      #
+      #     tree
+      #
+      # - uses: actions/upload-artifact@v4
+      #   with:
+      #     name: release
+      #     path: release
+
