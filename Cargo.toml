@@ -34,6 +34,9 @@ opt-level = "s"
 lto  = true
 codegen-units = 1
 
+[dev-dependencies]
+tempdir = "0.3.7"
+
 [package.metadata.packager]
 before-packaging-command = "cargo build --release"
 formats = ["deb", "pacman" ]
