@@ -1,6 +1,6 @@
 {
   inputs,
-  system,
+  localSystem,
   crossSystem,
   rustTargetTriple,
   pathCwd,
@@ -11,7 +11,7 @@
   common = import ./common.nix {};
 
   pkgs = import nixpkgs {
-    inherit crossSystem system;
+    inherit crossSystem localSystem;
     overlays = [(import rust-overlay)];
   };
 
