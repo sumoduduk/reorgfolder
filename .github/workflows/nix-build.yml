@@ -145,7 +145,8 @@ jobs:
     needs: build-for-apple-arm
     steps: 
     - uses: actions/download-artifact@v4
-      with: reorgfolder-aarch64-apple
+      with: 
+        name: reorgfolder-aarch64-apple
 
     - name: set permissions on package
       run: chmod +x binaries/reorgfolder-aarch64-apple
@@ -159,7 +160,8 @@ jobs:
     needs: build-for-apple-intel
     steps: 
     - uses: actions/download-artifact@v4
-      with: reorgfolder-x86_64-apple
+      with: 
+        name: reorgfolder-x86_64-apple
 
     - name: set permissions on package
       run: chmod +x binaries/reorgfolder-x86_64-apple
@@ -174,7 +176,8 @@ jobs:
       needs: build-for-apple-intel
       steps: 
       - uses: actions/download-artifact@v4
-        with: reorgfolder-x86_64-windows
+        with: 
+          name: reorgfolder-x86_64-windows
 
       - name: Ensure the command runs
         run: ./binaries/reorgfolder-x86_64-windows.exe --help
