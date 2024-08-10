@@ -54,45 +54,42 @@ fn get_available_filename(filename: &mut PathBuf) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::env;
+    use tempdir::TempDir;
 
     #[test]
     fn test_avail() {
-        let filename = env::temp_dir().join("test.txt");
-        let mut filename_target = env::temp_dir().join("test.txt");
+        let temp_dir = TempDir::new("test_reorg").unwrap();
+        let filename = temp_dir.path().join("test.txt");
+        let mut filename_target = filename.to_owned();
 
         File::create(&filename).unwrap();
 
         get_available_filename(&mut filename_target);
-        let expect_name = env::temp_dir().join("test(1).txt");
+        let expect_name = temp_dir.path().join("test(1).txt");
 
         assert_eq!(expect_name, filename_target);
-        trash::delete(&filename).unwrap();
     }
 
     #[test]
     fn test_avail_2() {
-        let filename = env::temp_dir().join("file.txt");
-        let filename_1 = env::temp_dir().join("file(1).txt");
-        let filename_2 = env::temp_dir().join("file(2).txt");
-        let filename_3 = env::temp_dir().join("file(3).txt");
+        let temp_dir = TempDir::new("test_reorg").unwrap();
 
-        let mut filename_target = env::temp_dir().join("file.txt");
+        let filename = temp_dir.path().join("file.txt");
+        let filename_1 = temp_dir.path().join("file(1).txt");
+        let filename_2 = temp_dir.path().join("file(2).txt");
+        let filename_3 = temp_dir.path().join("file(3).txt");
+
+        let mut filename_target = filename.to_owned();
 
         File::create(&filename).unwrap();
-        File::create(&filename_1).unwrap();
-        File::create(&filename_2).unwrap();
-        File::create(&filename_3).unwrap();
+        File::create(filename_1).unwrap();
+        File::create(filename_2).unwrap();
+        File::create(filename_3).unwrap();
 
         get_available_filename(&mut filename_target);
-        let expect_name = env::temp_dir().join("file(4).txt");
+        let expect_name = temp_dir.path().join("file(4).txt");
 
         assert_eq!(expect_name, filename_target);
-
-        trash::delete(&filename).unwrap();
-        trash::delete(&filename_1).unwrap();
-        trash::delete(&filename_2).unwrap();
-        trash::delete(&filename_3).unwrap();
     }
 
     #[test]
