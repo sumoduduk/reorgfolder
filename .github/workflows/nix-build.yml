@@ -135,10 +135,10 @@ jobs:
         name: reorgfolder-x86_64-linux
 
     - name: set permissions on package
-      run: chmod +x binaries/reorgfolder-x86_64-linux
+      run: chmod +x reorgfolder-x86_64-linux
 
     - name: Ensure the command runs
-      run: ./binaries/reorgfolder-x86_64-linux --help
+      run: ./reorgfolder-x86_64-linux --help
 
   test-from-apple-arm:
     name : test for apple ARM
@@ -150,10 +150,10 @@ jobs:
         name: reorgfolder-aarch64-apple
 
     - name: set permissions on package
-      run: chmod +x binaries/reorgfolder-aarch64-apple
+      run: chmod +x reorgfolder-aarch64-apple
 
     - name: Ensure the command runs
-      run: ./binaries/reorgfolder-aarch64-apple --help
+      run: ./reorgfolder-aarch64-apple --help
 
   test-from-apple-x86_64:
     name : test for  x86_64-apple-darwin
@@ -165,23 +165,23 @@ jobs:
         name: reorgfolder-x86_64-apple
 
     - name: set permissions on package
-      run: chmod +x binaries/reorgfolder-x86_64-apple
+      run: chmod +x reorgfolder-x86_64-apple
 
     - name: Ensure the command runs
-      run: ./binaries/reorgfolder-x86_64-apple --help
+      run: ./reorgfolder-x86_64-apple --help
 
 
   test-from-windows:
     name : test for windows
     runs-on: windows-latest
-    needs: build-for-apple-intel
+    needs: build-for-arm-linux-and-windows
     steps: 
     - uses: actions/download-artifact@v4
       with: 
         name: reorgfolder-x86_64-windows
 
     - name: Ensure the command runs
-      run: ./binaries/reorgfolder-x86_64-windows.exe --help
+      run: ./reorgfolder-x86_64-windows.exe --help
 
   make-release-group:
     runs-on: ubuntu-latest
