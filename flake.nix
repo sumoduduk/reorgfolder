@@ -42,11 +42,19 @@
               rustTargetTriple = "aarch64-unknown-linux-gnu";
             };
 
+            tar-linux-arm = import ./nix/tar-package.nix {
+              reorgfolder = self.packages.aarch64-linux.reorgfolder;
+            };
+
             reorgfolder_x86_64-linux = import ./nix/cross-build.nix {
               inherit localSystem inputs;
               pathCwd = ./.;
               crossSystem = "x86_64-linux";
               rustTargetTriple = "x86_64-unknown-linux-gnu";
+            };
+
+            tar-linux-x86 = import ./nix/tar-package.nix {
+              reorgfolder = self.packages.x86_64-linux.reorgfolder;
             };
 
             reorgfolder_x86_64-windows = import ./nix/window-build.nix {
@@ -62,6 +70,13 @@
                 pathCwd = ./.;
                 crossSystem = "aarch64-darwin";
                 rustTargetTriple = "aarch64-apple-darwin";
+              };
+
+              reorgfolder_x86_64-apple = import ./nix/cross-build.nix {
+                inherit localSystem inputs;
+                pathCwd = ./.;
+                crossSystem = "x86_64-darwin";
+                rustTargetTriple = "x86_64-apple-darwin";
               };
             }
             else if localSystem == "x86_64-darwin"

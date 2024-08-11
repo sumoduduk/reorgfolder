@@ -194,20 +194,20 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
 
+      - name: Assemble release directory
+        run: |
+          mkdir release
+          for i in reorgfolder-*; do
+            cp "$i"/* "release/"
+          done
+
+          tree
+
       - name : List all packages
         run : ls -R
 
-      # - name: Assemble release directory
-      #   run: |
-      #     mkdir release
-      #     for i in reorgfolder-*; do
-      #       cp "$i/*" "release/"
-      #     done
-      #
-      #     tree
-      #
-      # - uses: actions/upload-artifact@v4
-      #   with:
-      #     name: release
-      #     path: release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release
+          path: release
 
