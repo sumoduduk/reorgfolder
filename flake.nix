@@ -33,6 +33,8 @@
   }:
     flake-utils.lib.eachDefaultSystem (localSystem: {
       packages = let
+        pkgs = nixpkgs.legacyPackages.${localSystem};
+
         defineReorgfolderPkgs = {}:
           {
             reorgfolder_aarch64-linux = import ./nix/cross-build.nix {
@@ -42,10 +44,6 @@
               rustTargetTriple = "aarch64-unknown-linux-gnu";
             };
 
-            tar-linux-arm = import ./nix/tar-package.nix {
-              reorgfolder = self.packages.aarch64-linux.reorgfolder;
-            };
-
             reorgfolder_x86_64-linux = import ./nix/cross-build.nix {
               inherit localSystem inputs;
               pathCwd = ./.;
@@ -53,13 +51,14 @@
               rustTargetTriple = "x86_64-unknown-linux-gnu";
             };
 
-            tar-linux-x86 = import ./nix/tar-package.nix {
-              reorgfolder = self.packages.x86_64-linux.reorgfolder;
-            };
-
             reorgfolder_x86_64-windows = import ./nix/window-build.nix {
               inherit localSystem inputs;
               pathCwd = ./.;
+            };
+
+            build-rb-homebrew = pkgs.callPackage ./nix/homebrew-package.nix {
+              reorgfolderArm = self.packages.${localSystem}.reorgfolder_x86_64-linux;
+              reorgfolderIntel = self.packages.${localSystem}.reorgfolder_aarch64-linux;
             };
           }
           // (
@@ -72,11 +71,21 @@
                 rustTargetTriple = "aarch64-apple-darwin";
               };
 
+              tar-darwin-arm = pkgs.callPackage ./nix/tar-package.nix {
+                reorgfolder = self.packages.${localSystem}.reorgfolder_aarch64-apple;
+                architecture = "arm";
+              };
+
               reorgfolder_x86_64-apple = import ./nix/cross-build.nix {
                 inherit localSystem inputs;
                 pathCwd = ./.;
                 crossSystem = "x86_64-darwin";
                 rustTargetTriple = "x86_64-apple-darwin";
+              };
+
+              tar-darwin-x86_64 = pkgs.callPackage ./nix/tar-package.nix {
+                reorgfolder = self.packages.${localSystem}.reorgfolder_x86_64-apple;
+                architecture = "intel";
               };
             }
             else if localSystem == "x86_64-darwin"
