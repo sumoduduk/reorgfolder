@@ -55,11 +55,6 @@
               inherit localSystem inputs;
               pathCwd = ./.;
             };
-
-            build-rb-homebrew = pkgs.callPackage ./nix/homebrew-package.nix {
-              reorgfolderArm = self.packages.${localSystem}.reorgfolder_x86_64-linux;
-              reorgfolderIntel = self.packages.${localSystem}.reorgfolder_aarch64-linux;
-            };
           }
           // (
             if localSystem == "aarch64-darwin"
@@ -86,6 +81,11 @@
               tar-darwin-x86_64 = pkgs.callPackage ./nix/tar-package.nix {
                 reorgfolder = self.packages.${localSystem}.reorgfolder_x86_64-apple;
                 architecture = "intel";
+              };
+
+              build-rb-homebrew = pkgs.callPackage ./nix/homebrew-package.nix {
+                reorgfolderArm = self.packages.${localSystem}.reorgfolder_aarch64-apple;
+                reorgfolderIntel = self.packages.${localSystem}.reorgfolder_x86_64-apple;
               };
             }
             else if localSystem == "x86_64-darwin"
