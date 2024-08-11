@@ -8,7 +8,7 @@
   rb_build = ''
     class Reorgfolder < Formula
       desc "Blazingly fast and safe utility written in Rust for reorganizing folders by grouping files based on their extensions."
-      homepage "https://github.com/yourusername/yourrepo"
+      homepage "https://github.com/sumoduduk/reorgfolder"
       version "${version}"
 
       on_macos do
