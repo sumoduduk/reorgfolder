@@ -80,7 +80,35 @@ jobs:
           path : binaries/reorgfolder-x86_64-windows.exe
 
 
-  build-for-apple:
+  build-for-apple-intel:
+    name: build for x86_64-apple-darwin
+    runs-on: macos-13
+    needs: [verify-flake]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/common-setup
+        with:
+          cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
+      - name: Build reorgfolder for x86_64-apple-darwin
+        run: |
+          nix build .#reorgfolder_x86_64-apple --show-trace --log-lines 10000
+          ./result/bin/reorgfolder --version
+          cp ./result/bin/reorgfolder binaries/reorgfolder-x86_64-apple
+
+      - name: tar the package for mac-intel
+        run: |
+          nix build .#tar-darwin-x86_64 --show-trace --log-lines 10000
+          cp ./result/* binaries/
+
+      - name : upload packages reorgfolder-x86_64-apple
+        uses : actions/upload-artifact@v4
+        with : 
+          name : reorgfolder-x86_64-apple
+          path : binaries/*
+
+
+  build-for-apple-arm:
     name: build for apple Mac
     runs-on: macos-latest
     needs: [verify-flake]
@@ -90,66 +118,25 @@ jobs:
         with:
           cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
 
-      - name : create binaries folder for arm and mac-intel
-        run: |
-          mkdir -p  binaries-arm
-          mkdir -p  binaries-intel
-
       - name: Build Reorgfolder for aarch64-apple-darwin
         run: |
           nix build .#reorgfolder_aarch64-apple --show-trace --log-lines 10000
           ./result/bin/reorgfolder --version
-          cp ./result/bin/reorgfolder binaries-arm/reorgfolder-aarch64-apple
+          cp ./result/bin/reorgfolder binaries/reorgfolder-aarch64-apple
 
       - name: tar the package for mac-arm
         run: |
           nix build .#tar-darwin-arm --show-trace --log-lines 10000
-          cp ./result/* binaries-arm/
+          cp ./result/* binaries/
 
       - name: upload packages reorgfolder-aarch64-apple
         uses: actions/upload-artifact@v4
         with: 
           name: reorgfolder-aarch64-apple
-          path: binaries-arm/*
+          path: binaries/*
 
-      - name: Build reorgfolder for x86_64-apple-darwin
-        run: |
-          nix build .#reorgfolder_x86_64-apple --show-trace --log-lines 10000
-          ./result/bin/reorgfolder --version
-          cp ./result/bin/reorgfolder binaries-intel/reorgfolder-x86_64-apple
 
-      - name: tar the package for mac-intel
-        run: |
-          nix build .#tar-darwin-arm --show-trace --log-lines 10000
-          cp ./result/* binaries-intel/
 
-      - name : upload packages reorgfolder-x86_64-apple
-        uses : actions/upload-artifact@v4
-        with : 
-          name : reorgfolder-x86_64-apple
-          path : binaries-intel/*
-
-  # build-for-apple-intel:
-  #   name: build for x86_64-apple-darwin
-  #   runs-on: macos-13
-  #   needs: [verify-flake]
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: ./.github/actions/common-setup
-  #       with:
-  #         cachix_token: ${{ secrets.CACHIX_AUTH_TOKEN }}
-  #
-  #     - name: Build reorgfolder for x86_64-apple-darwin
-  #       run: |
-  #         nix build .#reorgfolder_x86_64-apple --show-trace --log-lines 10000
-  #         ./result/bin/reorgfolder --version
-  #         cp ./result/bin/reorgfolder binaries/reorgfolder-x86_64-apple
-  #
-  #     - name : upload packages reorgfolder-x86_64-apple
-  #       uses : actions/upload-artifact@v4
-  #       with : 
-  #         name : reorgfolder-x86_64-apple
-  #         path : binaries/reorgfolder-x86_64-apple
 
   test-from-latest-ubuntu:
     name : test for linux_x86_64
