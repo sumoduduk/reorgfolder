@@ -139,22 +139,68 @@ jobs:
 
       - name: tar the package for mac-arm
         run: |
-          mkdir -p tar_folder
+          mkdir -p tar_arm
           nix build .#tar-darwin-arm --show-trace --log-lines 10000
-          cp ./result/* tar_folder/
+          cp ./result/* tar_arm/
 
       - name: upload packages reorgfolder-aarch64-apple
         uses: actions/upload-artifact@v4
         with: 
           name: tar-reorgfolder-aarch64-apple
-          path: tar_folder/*
+          path: tar_arm/*
+
+      - name: download tar artifact from darwin intel
+        uses: actions/download-artifact@v4
+        with: 
+          name: tar-reorgfolder-x86_64-apple
+          path: tar_intel
+
+      - name: calulate sha of tar intel 
+        run: |
+          first_tar_gz=$(ls tar_intel/*.tar.gz | head -n 1)
+          if [ -z "$first_tar_gz" ]; then
+           echo "No .tar.gz file found in artifacts directory"
+           exit 1
+          fi
+          checksum=$(sha256sum "$first_tar_gz" | awk '{print $1}')
+          echo "checksum_intel=$checksum" >> $GITHUB_ENV
+
+      - name: calulate sha of tar arm 
+        run: |
+          first_tar_gz=$(ls tar_arm/*.tar.gz | head -n 1)
+          if [ -z "$first_tar_gz" ]; then
+           echo "No .tar.gz file found in artifacts directory"
+           exit 1
+          fi
+          checksum=$(sha256sum "$first_tar_gz" | awk '{print $1}')
+          echo "checksum_arm=$checksum" >> $GITHUB_ENV
+
+      - name: get version of app
+        run: |
+          nix build .#get_reorgfolder_version_darwin
+          version=$(cat result/version.txt)
+          echo "version_reorgfolder=$version" >> $GITHUB_ENV
+
+      - name: build the ruby file 
+        run: |
+          shaArm= &{{ env.checksum_arm }}
+          shaIntel= &{{ env.checksum_intel }}
+          version= &{{ env.version_reorgfolder }}
+          nix develop --command ./scripts/pack_homebrew.sh $shaArm $shaIntel $version
+          cat rb_build/reorgfolder.rb
+
+      - name: upload ruby file
+        uses: actions/upload-artifact@v4
+        with:
+          name: reorgfolder-homebrew-pack
+          path: rb_build/reorgfolder.rb
+
 
   test-from-latest-ubuntu:
     name : test for linux_x86_64
     runs-on: ubuntu-latest
     needs: build-for-linux_x86_64
     steps: 
-
     - uses: actions/download-artifact@v4
       with:
         name: reorgfolder-x86_64-linux
