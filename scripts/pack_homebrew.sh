@@ -37,13 +37,5 @@ end
 EOF
 )
 
-
-# calculate the sha256sum for reorgfolderArm
-# sha256_arm=$(sha256sum reorgfolder-arm.tar.gz | awk '{ print $1 }')
-
-# calculate the sha256sum for reorgfolderIntel
-# sha256_intel=$(sha256sum reorgfolder-intel.tar.gz | awk '{ print $1 }')
-
-# sed the shasum in rb build and save to out
 mkdir -p rb_build
 echo "$rb_build" > rb_build/reorgfolder.rb
