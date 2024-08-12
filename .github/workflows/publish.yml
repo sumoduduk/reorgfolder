@@ -20,7 +20,7 @@ jobs:
       - name: download homebrew-pack
         uses: actions/download-artifact@v4
         with:
-          name: reorgfolder-homebrew-pack
+          name: homebrew-pack-reorgfolder
 
       - name: copy the ruby file
         run: cp -f reorgfolder.rb homebrew-tap/Formula
@@ -28,7 +28,7 @@ jobs:
       - name: list all directory
         run : ls -R
 
-      - name: see git status
+      - name: see status and push it
         run: |
           cd homebrew-tap
           git status
