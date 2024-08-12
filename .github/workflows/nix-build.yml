@@ -111,14 +111,14 @@ jobs:
       - name: upload packages reorgfolder-aarch64-apple
         uses: actions/upload-artifact@v4
         with: 
-          name: tar-reorgfolder-x86_64-apple
+          name: reorgfolder-x86_64-apple-tar
           path: tar_folder/*
 
 
   build-for-apple-arm:
     name: build for apple Mac
     runs-on: macos-latest
-    needs: [verify-flake]
+    needs: [build-for-apple-intel]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/common-setup
@@ -146,13 +146,13 @@ jobs:
       - name: upload packages reorgfolder-aarch64-apple
         uses: actions/upload-artifact@v4
         with: 
-          name: tar-reorgfolder-aarch64-apple
+          name: reorgfolder-aarch64-apple-tar
           path: tar_arm/*
 
       - name: download tar artifact from darwin intel
         uses: actions/download-artifact@v4
         with: 
-          name: tar-reorgfolder-x86_64-apple
+          name: reorgfolder-x86_64-apple-tar
           path: tar_intel
 
       - name: calulate sha of tar intel 
@@ -183,16 +183,19 @@ jobs:
 
       - name: build the ruby file 
         run: |
-          shaArm= &{{ env.checksum_arm }}
-          shaIntel= &{{ env.checksum_intel }}
-          version= &{{ env.version_reorgfolder }}
+          shaArm=${{ env.checksum_arm }}
+          shaIntel=${{ env.checksum_intel }}
+          version=${{ env.version_reorgfolder }}
+          echo "checksum_arm=$shaArm"
+          echo "checksum_intel=$shaIntel"
+          echo "version=$version"
           nix develop --command ./scripts/pack_homebrew.sh $shaArm $shaIntel $version
           cat rb_build/reorgfolder.rb
 
       - name: upload ruby file
         uses: actions/upload-artifact@v4
         with:
-          name: reorgfolder-homebrew-pack
+          name: homebrew-pack-reorgfolder
           path: rb_build/reorgfolder.rb
 
 
@@ -214,7 +217,7 @@ jobs:
   test-from-apple-arm:
     name : test for apple ARM
     runs-on: macos-latest
-    needs: build-for-apple
+    needs: build-for-apple-arm
     steps: 
     - uses: actions/download-artifact@v4
       with: 
@@ -229,7 +232,7 @@ jobs:
   test-from-apple-x86_64:
     name : test for  x86_64-apple-darwin
     runs-on: macos-13
-    needs: build-for-apple
+    needs: build-for-apple-intel
     steps: 
     - uses: actions/download-artifact@v4
       with: 
@@ -263,15 +266,19 @@ jobs:
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
+        with:
+          path: release
+          pattern: reorgfolder-*
+          merge-multiple: true
 
-      - name: Assemble release directory
-        run: |
-          mkdir release
-          for i in reorgfolder-*; do
-            cp "$i"/* "release/"
-          done
-
-          tree
+      # - name: Assemble release directory
+      #   run: |
+      #     mkdir release
+      #     for i in reorgfolder-*; do
+      #       cp "$i"/* "release/"
+      #     done
+      #
+      #     tree
 
       - name : List all packages
         run : ls -R
