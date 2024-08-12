@@ -96,16 +96,23 @@ jobs:
           ./result/bin/reorgfolder --version
           cp ./result/bin/reorgfolder binaries/reorgfolder-x86_64-apple
 
-      - name: tar the package for mac-intel
-        run: |
-          nix build .#tar-darwin-x86_64 --show-trace --log-lines 10000
-          cp ./result/* binaries/
-
       - name : upload packages reorgfolder-x86_64-apple
         uses : actions/upload-artifact@v4
         with : 
           name : reorgfolder-x86_64-apple
           path : binaries/*
+
+      - name: tar the package for mac-intel
+        run: |
+          mkdir -p tar_folder
+          nix build .#tar-darwin-x86_64 --show-trace --log-lines 10000
+          cp ./result/* tar_folder/
+
+      - name: upload packages reorgfolder-aarch64-apple
+        uses: actions/upload-artifact@v4
+        with: 
+          name: tar-reorgfolder-x86_64-apple
+          path: tar_folder/*
 
 
   build-for-apple-arm:
@@ -124,19 +131,23 @@ jobs:
           ./result/bin/reorgfolder --version
           cp ./result/bin/reorgfolder binaries/reorgfolder-aarch64-apple
 
-      - name: tar the package for mac-arm
-        run: |
-          nix build .#tar-darwin-arm --show-trace --log-lines 10000
-          cp ./result/* binaries/
-
       - name: upload packages reorgfolder-aarch64-apple
         uses: actions/upload-artifact@v4
         with: 
           name: reorgfolder-aarch64-apple
-          path: binaries/*
+          path: binaries/reorgfolder-aarch64-apple
 
+      - name: tar the package for mac-arm
+        run: |
+          mkdir -p tar_folder
+          nix build .#tar-darwin-arm --show-trace --log-lines 10000
+          cp ./result/* tar_folder/
 
-
+      - name: upload packages reorgfolder-aarch64-apple
+        uses: actions/upload-artifact@v4
+        with: 
+          name: tar-reorgfolder-aarch64-apple
+          path: tar_folder/*
 
   test-from-latest-ubuntu:
     name : test for linux_x86_64
@@ -183,7 +194,6 @@ jobs:
 
     - name: Ensure the command runs
       run: ./reorgfolder-x86_64-apple --help
-
 
   test-from-windows:
     name : test for windows
