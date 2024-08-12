@@ -55,6 +55,28 @@
               inherit localSystem inputs;
               pathCwd = ./.;
             };
+
+            reorgfolder-pkgbuild = pkgs.callPackage ./nix/pkgbuild.nix {
+              reorgfolder = self.packages.${localSystem}.reorgfolder_x86_64-linux;
+            };
+
+            get_reorgfolder_version =
+              pkgs.runCommand "get_reorgfolder_version" {
+              } ''
+                mkdir -p $out
+                echo ${self.packages.${localSystem}.reorgfolder_x86_64-linux.version} > $out/version.txt
+              '';
+
+            # for test
+            tar-darwin-arm = pkgs.callPackage ./nix/tar-package.nix {
+              reorgfolder = self.packages.${localSystem}.reorgfolder_x86_64-linux;
+              architecture = "arm";
+            };
+
+            tar-darwin-x86_64 = pkgs.callPackage ./nix/tar-package.nix {
+              reorgfolder = self.packages.${localSystem}.reorgfolder_aarch64-linux;
+              architecture = "intel";
+            };
           }
           // (
             if localSystem == "aarch64-darwin"
@@ -71,6 +93,14 @@
                 architecture = "arm";
               };
 
+              get_reorgfolder_version_darwin =
+                pkgs.runCommand "get_reorgfolder_version" {
+                } ''
+                  mkdir -p $out
+                    echo ${self.packages.${localSystem}.reorgfolder_aarch64-apple.version} > $out/version.txt
+                '';
+
+              # Broken right now
               reorgfolder_x86_64-apple = import ./nix/cross-build.nix {
                 inherit localSystem inputs;
                 pathCwd = ./.;
@@ -86,14 +116,6 @@
               build-rb-homebrew = pkgs.callPackage ./nix/homebrew-package.nix {
                 reorgfolderArm = self.packages.${localSystem}.reorgfolder_aarch64-apple;
                 reorgfolderIntel = self.packages.${localSystem}.reorgfolder_x86_64-apple;
-              };
-
-              get_reorgfolder_version = pkgs.writeShellApplication {
-                name = "get_reorgfolder_version";
-                text = ''
-                  mkdir -p $out
-                  echo ${self.packages.${localSystem}.reorgfolder_aarch64-apple.version} > version.txt
-                '';
               };
             }
             else if localSystem == "x86_64-darwin"
