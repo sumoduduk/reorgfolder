@@ -162,7 +162,7 @@ jobs:
            echo "No .tar.gz file found in artifacts directory"
            exit 1
           fi
-          checksum=$(sha256sum "$first_tar_gz" | awk '{print $1}')
+          checksum=$(shasum -a 256 "$first_tar_gz" | awk '{print $1}')
           echo "checksum_intel=$checksum" >> $GITHUB_ENV
 
       - name: calulate sha of tar arm 
@@ -172,7 +172,7 @@ jobs:
            echo "No .tar.gz file found in artifacts directory"
            exit 1
           fi
-          checksum=$(sha256sum "$first_tar_gz" | awk '{print $1}')
+          checksum=$(shasum -a 256 "$first_tar_gz" | awk '{print $1}')
           echo "checksum_arm=$checksum" >> $GITHUB_ENV
 
       - name: get version of app
