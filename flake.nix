@@ -71,6 +71,18 @@
                 architecture = "arm";
               };
 
+              reorgfolder_x86_64-apple = import ./nix/cross-build.nix {
+                inherit localSystem inputs;
+                pathCwd = ./.;
+                crossSystem = "x86_64-darwin";
+                rustTargetTriple = "x86_64-apple-darwin";
+              };
+
+              tar-darwin-x86_64 = pkgs.callPackage ./nix/tar-package.nix {
+                reorgfolder = self.packages.${localSystem}.reorgfolder_x86_64-apple;
+                architecture = "intel";
+              };
+
               build-rb-homebrew = pkgs.callPackage ./nix/homebrew-package.nix {
                 reorgfolderArm = self.packages.${localSystem}.reorgfolder_aarch64-apple;
                 reorgfolderIntel = self.packages.${localSystem}.reorgfolder_x86_64-apple;
