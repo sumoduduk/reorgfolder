@@ -68,15 +68,15 @@
               '';
 
             # for test
-            tar-darwin-arm = pkgs.callPackage ./nix/tar-package.nix {
-              reorgfolder = self.packages.${localSystem}.reorgfolder_x86_64-linux;
-              architecture = "arm";
-            };
-
-            tar-darwin-x86_64 = pkgs.callPackage ./nix/tar-package.nix {
-              reorgfolder = self.packages.${localSystem}.reorgfolder_aarch64-linux;
-              architecture = "intel";
-            };
+            # tar-darwin-arm = pkgs.callPackage ./nix/tar-package.nix {
+            #   reorgfolder = self.packages.${localSystem}.reorgfolder_x86_64-linux;
+            #   architecture = "arm";
+            # };
+            #
+            # tar-darwin-x86_64 = pkgs.callPackage ./nix/tar-package.nix {
+            #   reorgfolder = self.packages.${localSystem}.reorgfolder_aarch64-linux;
+            #   architecture = "intel";
+            # };
           }
           // (
             if localSystem == "aarch64-darwin"
@@ -94,29 +94,29 @@
               };
 
               get_reorgfolder_version_darwin =
-                pkgs.runCommand "get_reorgfolder_version" {
+                pkgs.runCommand "get_reorgfolder_version_darwin" {
                 } ''
                   mkdir -p $out
                     echo ${self.packages.${localSystem}.reorgfolder_aarch64-apple.version} > $out/version.txt
                 '';
 
               # Broken right now
-              reorgfolder_x86_64-apple = import ./nix/cross-build.nix {
-                inherit localSystem inputs;
-                pathCwd = ./.;
-                crossSystem = "x86_64-darwin";
-                rustTargetTriple = "x86_64-apple-darwin";
-              };
-
-              tar-darwin-x86_64 = pkgs.callPackage ./nix/tar-package.nix {
-                reorgfolder = self.packages.${localSystem}.reorgfolder_x86_64-apple;
-                architecture = "intel";
-              };
-
-              build-rb-homebrew = pkgs.callPackage ./nix/homebrew-package.nix {
-                reorgfolderArm = self.packages.${localSystem}.reorgfolder_aarch64-apple;
-                reorgfolderIntel = self.packages.${localSystem}.reorgfolder_x86_64-apple;
-              };
+              # reorgfolder_x86_64-apple = import ./nix/cross-build.nix {
+              #   inherit localSystem inputs;
+              #   pathCwd = ./.;
+              #   crossSystem = "x86_64-darwin";
+              #   rustTargetTriple = "x86_64-apple-darwin";
+              # };
+              #
+              # tar-darwin-x86_64 = pkgs.callPackage ./nix/tar-package.nix {
+              #   reorgfolder = self.packages.${localSystem}.reorgfolder_x86_64-apple;
+              #   architecture = "intel";
+              # };
+              #
+              # build-rb-homebrew = pkgs.callPackage ./nix/homebrew-package.nix {
+              #   reorgfolderArm = self.packages.${localSystem}.reorgfolder_aarch64-apple;
+              #   reorgfolderIntel = self.packages.${localSystem}.reorgfolder_x86_64-apple;
+              # };
             }
             else if localSystem == "x86_64-darwin"
             then {
