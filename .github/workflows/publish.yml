@@ -21,7 +21,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           workflow: nix-build.yml 
-          name: homebrew-pack-termusix  
+          name: homebrew-pack-reorgfolder  
           workflow_conclusion: success
 
       - name: copy the ruby file
