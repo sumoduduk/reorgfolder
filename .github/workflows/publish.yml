@@ -70,6 +70,6 @@ jobs:
           pkgbuild: ./PKGBUILD
           commit_username: sumoduduk
           commit_email: sumoduduk13@gmail.com
-          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh_private_key: ${{ secrets.AUR_AUTH_KEY }}
           commit_message: Update AUR package
           ssh_keyscan_types: rsa,dsa,ecdsa,ed25519
